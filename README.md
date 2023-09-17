@@ -1,2 +1,18 @@
 # backup_cronjob
-A bash script to backup files to a SAMBA server that can be used as a CRON job
+
+Last update: 2023-09-17 17:56
+<br><br>
+
+## backup_cronjob
+
+**Title**: backup_cronjob
+
+**Date Started**: 2023-09-17
+
+**Date Completed**:
+
+**Language**: Python
+
+**Overview**: A bash script that can be run as a CRON job. The script allows you to define a source and target, and then copies the files over to the target.
+
+**Result**:
