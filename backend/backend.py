@@ -6,6 +6,9 @@ import sys
 import glob
 import time
 from datetime import datetime
+from alive_progress import alive_bar
+
+from time import sleep
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', filename='backend_cronjob.log', level=logging.INFO)
 # logger = logging.getLogger('backup_logger')
@@ -22,8 +25,13 @@ class Backup:
             dry_run: bool = False
         ):
         """Initialise the Backup instance."""
-        self.source = Path(os.path.expanduser(source))  # Replaces "~" with the full path.
-        self.target = Path(os.path.expanduser(target))
+        try:
+            self.source = Path(os.path.expanduser(source))  # Replaces "~" with the full path.
+            self.target = Path(os.path.expanduser(target))
+        except TypeError as e:
+            logging.error("Source or Target directory are not a string")
+            sys.exit()
+
         self.overwrite = overwrite
         self.ignored_ext = ignored_ext
         self.ignored_files = ignored_files
@@ -34,6 +42,7 @@ class Backup:
 
     def check_dir_exists(self) -> bool:
         """Checks that the source and target directories exist."""
+
         if self.source.is_dir() and self.target.is_dir():
             return True
         return False
@@ -54,10 +63,6 @@ class Backup:
 
     def output(self, time_taken: float, count: int) -> dict:
         """Outputs the results to the user."""
-
-        # Time taken
-        # Files transferred
-        # Directories Ignored
 
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -93,21 +98,30 @@ class Backup:
         directories_ignored = []
         files_ignored = []
         time_taken = 0
+        total_items = len(source_files)
 
-        # Create each directory and copy each file.
-        for index, file in enumerate(source_files):
-            split_point = file.find("/")
-            new_path = f"{self.target}/{file[split_point + 1:]}"
+        # Used for the progress bar/
+        with alive_bar(total_items, bar="filling") as progress_bar:
 
-            if Path(file).is_dir():
-                os.mkdir(new_path)
-                logging.info(f"New directory created: {new_path}")
-            else:
-                shutil.copy(source_files[index], new_path)
-                count = count + 1
-        
-        end = time.perf_counter()
-        time_taken = end - start
+            # Create each directory and copy each file.
+            for index, file in enumerate(source_files):
+                split_point = file.find("/")
+                new_path = f"{self.target}/{file[split_point + 1:]}"
+
+                if Path(file).is_dir():
+                    os.mkdir(new_path)
+                    logging.info(f"New directory created: {new_path}")
+                else:
+                    shutil.copy(source_files[index], new_path)
+                    count = count + 1
+                
+
+                sleep(0.5)
+                progress_bar()  # Add another notch to the progress bar
+            
+            end = time.perf_counter()
+            time_taken = end - start
+
         
         output = self.output(time_taken, count) 
 
@@ -121,6 +135,13 @@ if __name__ == "__main__":
     target = Path("./Test_Target")
 
     backup = Backup(source, target)
-    result = backup.transfer_files()
+    # result = backup.transfer_files()
+
+    backup = Backup(1, target)
+    result = backup.check_dir_exists()
 
     print(result)
+
+
+
+    # print(result)
