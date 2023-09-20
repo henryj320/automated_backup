@@ -1,6 +1,6 @@
 # backup_cronjob
 
-Last update: 2023-09-17 17:59
+Last update: 2023-09-19 23:51
 <br><br>
 
 ## Development Notes for backup_cronjob
@@ -11,3 +11,9 @@ Last update: 2023-09-17 17:59
     - https://builtin.com/software-engineering-perspectives/python-progress-bar
 4. Set up each method.
 5. Wrote the initial script.
+6. Next steps:
+    - Add logging. ✅
+    - Output the final result using ` output(self) `. ✅
+    - Add a progress bar.
+    - Add testing.
+    - Add the other options (e.g. overwrite)
