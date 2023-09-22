@@ -29,8 +29,8 @@ class Backup:
             self.source = Path(os.path.expanduser(source))  # Replaces "~" with the full path.
             self.target = Path(os.path.expanduser(target))
         except TypeError as e:
-            logging.error("Source or Target directory are not a string")
-            sys.exit()
+            logging.error("Source or Target directory are not a string.")
+            sys.exit("Source or Target directory are not a string.")
 
         self.overwrite = overwrite
         self.ignored_ext = ignored_ext
@@ -50,6 +50,11 @@ class Backup:
 
     def check_target_ready(self) -> bool:
         """Checks that the target empty if overwrite is set to false."""
+
+        if not isinstance(self.overwrite, bool):
+            logging.error("Overwrite is not set to a bool! Exiting.")
+            raise TypeError
+
         # Skip because overwrite is allowed.
         if self.overwrite:
             return True
@@ -63,6 +68,15 @@ class Backup:
 
     def output(self, time_taken: float, count: int) -> dict:
         """Outputs the results to the user."""
+
+        # Check the inputs are valid.
+        try:
+            if time_taken < 0 or count < 0:
+                logging.error("The time taken or number of files cannot be less than 0.")
+                raise ValueError
+        except TypeError as e:
+            logging.error(f"The time_taken or count are the incorrect type. {e}")
+            sys.exit("The time_taken or count are the incorrect type.")
 
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -83,12 +97,13 @@ class Backup:
         # Exit early if source or target directory does not exist.
         if not self.check_dir_exists():
             logging.error("Source or target directory does not exist.")
-            sys.exit()
+            sys.exit("Source or target directory does not exist.")
 
         # Exit early if !overwrite and target directory is not empty.
         if not self.check_target_ready():
             logging.error("Overwrite is set to 'False' but target directory is not empty.")
-            sys.exit()
+            print("Overwrite is set to 'False' but target directory is not empty.")
+            sys.exit("Overwrite is set to 'False' but target directory is not empty.")
         
         # Find all files in the source firectory.
         source_files = glob.glob(f"{self.source}/**", recursive=True)
@@ -105,8 +120,13 @@ class Backup:
 
             # Create each directory and copy each file.
             for index, file in enumerate(source_files):
-                split_point = file.find("/")
-                new_path = f"{self.target}/{file[split_point + 1:]}"
+                # Removes all directories from the path so just the file is left.
+
+                file_only = file
+                while "/" in file_only:
+                    split_point = file_only.find("/")
+                    file_only = file_only[split_point + 1:]
+                new_path = f"{self.target}/{file_only}"
 
                 if Path(file).is_dir():
                     os.mkdir(new_path)
@@ -116,7 +136,7 @@ class Backup:
                     count = count + 1
                 
 
-                sleep(0.5)
+                # sleep(0.5)
                 progress_bar()  # Add another notch to the progress bar
             
             end = time.perf_counter()
@@ -127,6 +147,23 @@ class Backup:
 
         logging.info(f"Backup job completed in {time_taken:0.4f} seconds.")
         return output
+    
+    def empty_directory(self, directory: str) -> bool:
+        """Remove all files in the given directory"""
+        files = glob.glob(f"{directory}/**", recursive=True)
+        files.pop(0)
+        for file in files:
+            # If a file, not a directory.
+            if os.path.isfile(file) or os.path.islink(file):
+                # Deletes the file.
+                os.unlink(file)
+            
+            # If a directory
+            elif os.path.isdir(file):
+                # Deletes the directory and all its contents.
+                shutil.rmtree(file)
+        
+        return True
 
 
 
@@ -134,13 +171,18 @@ if __name__ == "__main__":
     source = Path("./Test_Source")
     target = Path("./Test_Target")
 
+
     backup = Backup(source, target)
-    # result = backup.transfer_files()
 
-    backup = Backup(1, target)
-    result = backup.check_dir_exists()
+    backup.empty_directory(target)
+    
+    result = backup.transfer_files()
 
-    print(result)
+    # backup = Backup(1, target)
+    # result = backup.check_dir_exists()
+
+    # print(result)
+
 
 
 

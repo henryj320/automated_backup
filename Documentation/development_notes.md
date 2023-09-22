@@ -1,6 +1,6 @@
 # backup_cronjob
 
-Last update: 2023-09-20 19:23
+Last update: 2023-09-22 01:16
 <br><br>
 
 ## Development Notes for backup_cronjob
@@ -26,3 +26,8 @@ Last update: 2023-09-20 19:23
     - Learning how to import Backup
     - Writing the tests
     - You can run it with ` pytest ` while in the project root directory.
+    - Trying to see coverage
+        - ` pip install pytest-cov `
+        - Can now run ` pytest --cov ` or  ` coverage report ` or ` coverage report --fail-under=70 `
+        - More info on ` pytest --cov ` here: https://pytest-cov.readthedocs.io/en/latest/config.html#reference
+    - Writing lots more tests.
