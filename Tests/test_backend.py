@@ -109,8 +109,8 @@ def test_output():
 
 
 def test_transfer_files():
-    good_source = "./Tests/Test_Source"
-    good_target = "./Tests/Test_Target"
+    good_source = "Tests/Test_Source"
+    good_target = "Tests/Test_Target"
 
     backend = Backup(good_source, good_target)
 
@@ -166,13 +166,11 @@ def test_transfer_files():
     os.mkdir(ignored_directory)
     fill_source(10, good_source)
     fill_source(10, ignored_directory)
-    result = backend_overwrite.transfer_files()
+    result = backend.transfer_files()
     assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     assert result["files_transferred"] == 10
     assert result["time_taken"] < 10
     assert result["ignored_directories"] == [ignored_directory]
-
-    # TODO: Check it works when ignored directories is implemented.
 
 
 
@@ -183,6 +181,13 @@ def test_transfer_files():
     # With ignored extensions.
 
     # Dry run.
+    # backend = Backup(good_source, good_target, dry_run=True)
+    # backend.empty_directory(good_source)
+    # backend.empty_directory(good_target)
+    # fill_source(10, good_source)
+    # backend.transfer_files()
+    # assert len(os.listdir(good_target)) == 0
 
-    backend.empty_directory(good_source)
-    backend.empty_directory(good_target)
+
+    # backend.empty_directory(good_source)
+    # backend.empty_directory(good_target)

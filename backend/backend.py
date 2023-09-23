@@ -118,22 +118,60 @@ class Backup:
         # Used for the progress bar/
         with alive_bar(total_items, bar="filling") as progress_bar:
 
+            # ignored_patterns = []
+            # for ext in self.ignored_ext:
+                # ignored_patterns.append(f"*{ext}")  # Adds *.jpg
+
             # Create each directory and copy each file.
             for index, file in enumerate(source_files):
                 # Removes all directories from the path so just the file is left.
 
-                file_only = file
-                while "/" in file_only:
-                    split_point = file_only.find("/")
-                    file_only = file_only[split_point + 1:]
-                new_path = f"{self.target}/{file_only}"
+                # file_only = file
+                # while "/" in file_only:
+                split_point = file.split("/")
+                split_point.pop(0)  # Removes "Test_Source"
+                    # new_start = split_point[:-1]
+                    # file_only = file_only[split_point + 1:]
+                new_path = ""
+                for dir in split_point:
+                    new_path = new_path + "/" + dir
+                new_path = f"{self.target}/{new_path}"
+                # new_path = f"{self.target}/{file_only}"
 
+                print("FILE:")
+                print(file)
                 if Path(file).is_dir():
+                    if file in self.ignored_directories:
+                        progress_bar() 
+                        logging.info(f"{file} not created as in ignored directories list.")
+                        continue
+                    if self.dry_run:
+                        logging.info(f"DRY RUN: New directory would be created: {new_path}.")
+                        progress_bar()  # Add another notch to the progress bar
+                        continue
                     os.mkdir(new_path)
-                    logging.info(f"New directory created: {new_path}")
+                    logging.info(f"New directory created: {new_path}.")
+
+                # If it is a file, not directory.
                 else:
-                    shutil.copy(source_files[index], new_path)
-                    count = count + 1
+                    file_location = os.path.dirname(file)
+                    print(f"file_location - {file_location}")
+                    print(f"new_path - {new_path}")
+                    if self.dry_run:
+                        logging.info(f"DRY RUN: File would be copied to: {new_path}.")
+                        progress_bar()  # Add another notch to the progress bar
+                        continue
+                    elif file_location in self.ignored_directories:
+                        progress_bar() 
+                        logging.info(f"{file} not created as in ignored directories list.")
+                        continue
+                    elif file in self.ignored_files:
+                        progress_bar() 
+                        logging.info(f"{file} not created as in ignored files list.")
+                        continue
+                    elif Path(source_files[index]).suffix not in self.ignored_ext:
+                        shutil.copy(source_files[index], new_path)
+                        count = count + 1
                 
 
                 # sleep(0.5)
@@ -172,7 +210,11 @@ if __name__ == "__main__":
     target = Path("./Test_Target")
 
 
-    backup = Backup(source, target)
+    backup = Backup(source, target, ignored_ext=[".txt"], ignored_directories=["Test_Source/Ignored_Dir"])
+    # backup = Backup(source, target, ignored_ext=[".txt"], ignored_directories=["Test_Source/Ignored_Dir"])
+
+    backup = Backup(source, target, ignored_files=["Test_Source/Hey/Im_unwanted.txt"])
+
 
     backup.empty_directory(target)
     

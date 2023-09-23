@@ -31,3 +31,6 @@ Last update: 2023-09-22 01:16
         - Can now run ` pytest --cov ` or  ` coverage report ` or ` coverage report --fail-under=70 `
         - More info on ` pytest --cov ` here: https://pytest-cov.readthedocs.io/en/latest/config.html#reference
     - Writing lots more tests.
+    - Adding a dry run capability.
+    - Looks like it currently fails if a directory has the same name as a file
+        - ` FileExistsError: [Errno 17] File exists: 'Test_Target/Hey' `
