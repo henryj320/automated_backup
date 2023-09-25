@@ -19,6 +19,10 @@ class Backup:
             source: Path,
             target: Path,
             overwrite: bool = False,
+            overwrite_condition: str = "Target Empty",
+            # "Target Empty":  Fails if target is not empty.
+            # "Ignore": Do not copy over any files that already exist in target.
+            # "Duplicate":  Keep both old and new file in target with a (1) at the end.
             ignored_ext: list = [],
             ignored_files: list = [],
             ignored_directories: list = [],
@@ -33,6 +37,7 @@ class Backup:
             sys.exit("Source or Target directory are not a string.")
 
         self.overwrite = overwrite
+        self.overwrite_condition = overwrite_condition
         self.ignored_ext = ignored_ext
         self.ignored_files = ignored_files
         self.ignored_directories = ignored_directories
@@ -48,22 +53,22 @@ class Backup:
         return False
         
 
-    def check_target_ready(self) -> bool:
+    def check_target_ready(self) -> tuple:
         """Checks that the target empty if overwrite is set to false."""
 
         if not isinstance(self.overwrite, bool):
-            logging.error("Overwrite is not set to a bool! Exiting.")
-            raise TypeError
+            return (False, "Overwrite is not set to a bool! Exiting.")
+        
 
         # Skip because overwrite is allowed.
         if self.overwrite:
-            return True
+            return (True, "")
         
         # If target is empty
         if len(os.listdir(self.target)) == 0:
-            return True
+            return (True, "")
         
-        return False
+        return (False, "Overwrite is set to 'False' but target directory is not empty.")
 
 
     def output(self, time_taken: float, count: int) -> dict:
@@ -84,6 +89,8 @@ class Backup:
             "completed_at": now,
             "files_transferred": count,
             "time_taken": time_taken,
+            "ignored_ext": self.ignored_ext,
+            "ignored_files": self.ignored_files,
             "ignored_directories": self.ignored_directories
         }
 
@@ -100,14 +107,17 @@ class Backup:
             sys.exit("Source or target directory does not exist.")
 
         # Exit early if !overwrite and target directory is not empty.
-        if not self.check_target_ready():
-            logging.error("Overwrite is set to 'False' but target directory is not empty.")
-            print("Overwrite is set to 'False' but target directory is not empty.")
-            sys.exit("Overwrite is set to 'False' but target directory is not empty.")
+        check_target_ready_bool, check_target_ready_str = self.check_target_ready()
+        if not check_target_ready_bool:
+            logging.error(check_target_ready_str)
+            print(check_target_ready_str)
+            sys.exit(check_target_ready_str)
         
         # Find all files in the source firectory.
         source_files = glob.glob(f"{self.source}/**", recursive=True)
         source_files.pop(0)  # Removes the root directory.
+        print("Here")
+        print(source_files)
 
         count = 0  # Number of files replicated.
         directories_ignored = []
@@ -128,26 +138,37 @@ class Backup:
 
                 # file_only = file
                 # while "/" in file_only:
+                source_split = str(self.source).split("/")
+                source_end = source_split[len(source_split) - 1]
                 split_point = file.split("/")
-                split_point.pop(0)  # Removes "Test_Source"
+                # print(f"{source_end} is source end")
+                # print(split_point)
+                while split_point[0] != source_end:
+                    split_point.pop(0)  # Removes "Test_Source"
                     # new_start = split_point[:-1]
                     # file_only = file_only[split_point + 1:]
+                split_point.pop(0)
+                # print("here")
+                print(split_point)
                 new_path = ""
                 for dir in split_point:
                     new_path = new_path + "/" + dir
                 new_path = f"{self.target}/{new_path}"
+                # print(new_path)
                 # new_path = f"{self.target}/{file_only}"
 
-                print("FILE:")
-                print(file)
+                # print("FILE:")
+                # print(file)
                 if Path(file).is_dir():
                     if file in self.ignored_directories:
                         progress_bar() 
                         logging.info(f"{file} not created as in ignored directories list.")
+                        new_path = ""
                         continue
                     if self.dry_run:
                         logging.info(f"DRY RUN: New directory would be created: {new_path}.")
                         progress_bar()  # Add another notch to the progress bar
+                        new_path = ""
                         continue
                     os.mkdir(new_path)
                     logging.info(f"New directory created: {new_path}.")
@@ -160,14 +181,17 @@ class Backup:
                     if self.dry_run:
                         logging.info(f"DRY RUN: File would be copied to: {new_path}.")
                         progress_bar()  # Add another notch to the progress bar
+                        new_path = ""
                         continue
                     elif file_location in self.ignored_directories:
                         progress_bar() 
                         logging.info(f"{file} not created as in ignored directories list.")
+                        new_path = ""
                         continue
                     elif file in self.ignored_files:
                         progress_bar() 
                         logging.info(f"{file} not created as in ignored files list.")
+                        new_path = ""
                         continue
                     elif Path(source_files[index]).suffix not in self.ignored_ext:
                         shutil.copy(source_files[index], new_path)
@@ -176,6 +200,8 @@ class Backup:
 
                 # sleep(0.5)
                 progress_bar()  # Add another notch to the progress bar
+
+                new_path = ""
             
             end = time.perf_counter()
             time_taken = end - start
@@ -210,13 +236,19 @@ if __name__ == "__main__":
     target = Path("./Test_Target")
 
 
-    backup = Backup(source, target, ignored_ext=[".txt"], ignored_directories=["Test_Source/Ignored_Dir"])
+    # backup = Backup(source, target, ignored_ext=[".txt"], ignored_directories=["Test_Source/Ignored_Dir"])
     # backup = Backup(source, target, ignored_ext=[".txt"], ignored_directories=["Test_Source/Ignored_Dir"])
 
-    backup = Backup(source, target, ignored_files=["Test_Source/Hey/Im_unwanted.txt"])
+    # backup = Backup(source, target, ignored_files=["Test_Source/Hey/Im_unwanted.txt"])
 
 
-    backup.empty_directory(target)
+    # backup.empty_directory(target)
+
+    good_source = "Tests/Test_Source"
+    good_target = "Tests/Test_Target"
+    ignored_directory = f"{good_source}/IgnoredDirectory"
+    backup = Backup(good_source, good_target, ignored_directories=[ignored_directory])
+
     
     result = backup.transfer_files()
 

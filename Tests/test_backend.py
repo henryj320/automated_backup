@@ -18,6 +18,7 @@ def fill_source(number_of_files: int, source: pathlib.PosixPath) -> None:
     for x in range(0, number_of_files):
         # Creates a new file
         file = open(f"{source}/file{x}.txt", "w")
+        file.close()
 
 
 def test_files(tmp_path):
@@ -68,12 +69,14 @@ def test_check_target_ready(tmp_path):
     assert backend_empty_target_overwrite.check_target_ready()
 
     # Not overwrite with non-empty target.
-    assert not backend_empty_target.check_target_ready()
+    result_bool, result_str = backend_empty_target.check_target_ready()
+    assert not result_bool
     
     # Non-bool  overwrite.
     backend_empty_target_int_overwrite = Backup("./Test_Source", tmp_path, overwrite=1)
-    with pytest.raises(TypeError) as e:
-        backend_empty_target_int_overwrite.check_target_ready()
+    # with pytest.raises(TypeError) as e:
+    result_bool, result_str = backend_empty_target_int_overwrite.check_target_ready()
+    assert not result_bool
 
 
 def test_output():
@@ -147,6 +150,8 @@ def test_transfer_files():
     assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     assert result["files_transferred"] == 10
     assert result["time_taken"] < 10
+    assert result["ignored_ext"] == []
+    assert result["ignored_files"] == []
     assert result["ignored_directories"] == []
 
     # Overwrite with non-empty target.
@@ -156,6 +161,8 @@ def test_transfer_files():
     assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     assert result["files_transferred"] == 10
     assert result["time_taken"] < 10
+    assert result["ignored_ext"] == []
+    assert result["ignored_files"] == []
     assert result["ignored_directories"] == []
 
     # With ignored directories.
@@ -170,24 +177,53 @@ def test_transfer_files():
     assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     assert result["files_transferred"] == 10
     assert result["time_taken"] < 10
+    assert result["ignored_ext"] == []
+    assert result["ignored_files"] == []
     assert result["ignored_directories"] == [ignored_directory]
 
 
-
-
-
     # With ignored files.
+    backend.empty_directory(good_source)
+    backend.empty_directory(good_target)
+    fill_source(10, good_source)
+    ignored_file_path = f"{good_source}/ignored.txt"
+    ignored_file = open(ignored_file_path, "w")
+    ignored_file.close()
+    backend = Backup(good_source, good_target, ignored_files=[ignored_file_path])
+    result = backend.transfer_files()
+    assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    assert result["files_transferred"] == 10
+    assert result["time_taken"] < 10
+    assert result["ignored_ext"] == []
+    assert result["ignored_files"] == [ignored_file_path]
+    assert result["ignored_directories"] == []
+
 
     # With ignored extensions.
+    backend.empty_directory(good_source)
+    backend.empty_directory(good_target)
+    fill_source(10, good_source)
+    for x in range(0, 5):
+        ignored_file = open(f"{good_source}/{x}.png", "w")
+        ignored_file.close()
+    backend = Backup(good_source, good_target, ignored_ext=[".png"])
+    result = backend.transfer_files()
+    assert result["completed_at"] == datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    assert result["files_transferred"] == 10
+    assert result["time_taken"] < 10
+    assert result["ignored_ext"] == [".png"]
+    assert result["ignored_files"] == []
+    assert result["ignored_directories"] == []
+
+    
+
 
     # Dry run.
-    # backend = Backup(good_source, good_target, dry_run=True)
-    # backend.empty_directory(good_source)
-    # backend.empty_directory(good_target)
-    # fill_source(10, good_source)
-    # backend.transfer_files()
-    # assert len(os.listdir(good_target)) == 0
+    backend.empty_directory(good_target)
+    backend = Backup(good_source, good_target, dry_run=True)
+    fill_source(10, good_source)
+    backend.transfer_files()
+    assert len(os.listdir(good_target)) == 0
 
-
-    # backend.empty_directory(good_source)
-    # backend.empty_directory(good_target)
+    backend.empty_directory(good_source)
+    backend.empty_directory(good_target)

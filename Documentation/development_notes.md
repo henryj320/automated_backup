@@ -34,3 +34,10 @@ Last update: 2023-09-22 01:16
     - Adding a dry run capability.
     - Looks like it currently fails if a directory has the same name as a file
         - ` FileExistsError: [Errno 17] File exists: 'Test_Target/Hey' `
+    - All tests are now complete.
+9. Now that the tests are ready, I need multiple options for ` overwrite `. Here are the options that would be useful:
+    - Overwrite
+    - Not overwrite
+        - Fail if target is not empty
+        - Ignore files that already exist
+        - Create a "(1)" duplicate of the file
