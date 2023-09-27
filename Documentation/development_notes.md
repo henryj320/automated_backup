@@ -1,6 +1,6 @@
 # backup_cronjob
 
-Last update: 2023-09-22 01:16
+Last update: 2023-09-27 21:54
 <br><br>
 
 ## Development Notes for backup_cronjob
@@ -36,8 +36,15 @@ Last update: 2023-09-22 01:16
         - ` FileExistsError: [Errno 17] File exists: 'Test_Target/Hey' `
     - All tests are now complete.
 9. Now that the tests are ready, I need multiple options for ` overwrite `. Here are the options that would be useful:
-    - Overwrite
-    - Not overwrite
-        - Fail if target is not empty
-        - Ignore files that already exist
-        - Create a "(1)" duplicate of the file
+    - **Overwrite**
+        - Update all files ✅ (Default)
+        - Update file if modified within the last x days ("Recently Modified") ✅
+    - **Not overwrite**
+        - Fail if target is not empty ("Target Empty")
+        - Ignore files that already exist ("Ignore")
+        - Create a "(1)" duplicate of the file ("Duplicate")
+    - Just making sure it works with full paths
+        - Yep, seems fine
+    - Separating the transfer_files() into separate functions
+    - Testing "Overwrite ➡️ Update all files" works
+        - Yep, it already works

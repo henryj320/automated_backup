@@ -23,6 +23,7 @@ class Backup:
             # "Target Empty":  Fails if target is not empty.
             # "Ignore": Do not copy over any files that already exist in target.
             # "Duplicate":  Keep both old and new file in target with a (1) at the end.
+            # "Recently Modified"
             ignored_ext: list = [],
             ignored_files: list = [],
             ignored_directories: list = [],
@@ -67,6 +68,10 @@ class Backup:
         # If target is empty
         if len(os.listdir(self.target)) == 0:
             return (True, "")
+        # If overwrite_condition is "Ignore" or "Duplicate".
+        elif self.overwrite_condition != "Target Empty":
+            return (True, "")
+
         
         return (False, "Overwrite is set to 'False' but target directory is not empty.")
 
@@ -93,13 +98,10 @@ class Backup:
             "ignored_files": self.ignored_files,
             "ignored_directories": self.ignored_directories
         }
+    
 
-
-    def transfer_files(self):
-        """Transfers the files from the source to the directory, respecting the user inputs."""
-
-        logging.info(f"Transfer process started with the following settings: Overwrite: {self.overwrite}, Dry Run: {self.dry_run}.")
-        start = time.perf_counter()
+    def check_ready(self):
+        """Exits prematurely if any of the checks fail."""
         
         # Exit early if source or target directory does not exist.
         if not self.check_dir_exists():
@@ -112,16 +114,75 @@ class Backup:
             logging.error(check_target_ready_str)
             print(check_target_ready_str)
             sys.exit(check_target_ready_str)
+
+            # TODO: Make it return and then just print that in the transfer_files() section so it passes the tests.
         
+    
+
+    def list_files(self) -> list:
+        """List all of the files in the source."""
         # Find all files in the source firectory.
         source_files = glob.glob(f"{self.source}/**", recursive=True)
         source_files.pop(0)  # Removes the root directory.
-        print("Here")
-        print(source_files)
+
+        return source_files
+    
+
+    def remove_start_path(self, file):
+        """Gets rid of the beginning of the path."""
+
+        # file_only = file
+        # while "/" in file_only:
+        source_split = str(self.source).split("/")
+        source_end = source_split[len(source_split) - 1]
+        split_point = file.split("/")
+        # print(f"{source_end} is source end")
+        # print(split_point)
+        while split_point[0] != source_end:
+            split_point.pop(0)  # Removes "Test_Source"
+            # new_start = split_point[:-1]
+            # file_only = file_only[split_point + 1:]
+        split_point.pop(0)
+
+        return split_point
+
+
+    def check_file_last_modified(self, filepath: str, hours: int) -> bool:
+        """Checks whether the file was modified within the last x hours.
+
+        Args:
+            filepath (str): Path to the file to check.
+            hours (int): Number of hours .
+
+        Returns:
+            bool: True if file was modified within the last x hours.
+        """
+
+        # value is a floating point number giving the number of seconds since the epoch
+        time_modified = os.path.getmtime(filepath)
+
+        # time_modified_timestamp = time.ctime(time_modified)
+
+        seconds_since_modified = time.time() - time_modified
+        minutes_since_modified = seconds_since_modified / 60
+        hours_since_modified = minutes_since_modified / 60
+
+        if hours_since_modified > hours:
+            return False
+        
+        return True
+
+
+    def transfer_files(self):
+        """Transfers the files from the source to the directory, respecting the user inputs."""
+
+        logging.info(f"Transfer process started with the following settings: Overwrite: {self.overwrite}, Dry Run: {self.dry_run}.")
+        start = time.perf_counter()
+
+        self.check_target_ready()
+        source_files = self.list_files()        
 
         count = 0  # Number of files replicated.
-        directories_ignored = []
-        files_ignored = []
         time_taken = 0
         total_items = len(source_files)
 
@@ -136,19 +197,9 @@ class Backup:
             for index, file in enumerate(source_files):
                 # Removes all directories from the path so just the file is left.
 
-                # file_only = file
-                # while "/" in file_only:
-                source_split = str(self.source).split("/")
-                source_end = source_split[len(source_split) - 1]
-                split_point = file.split("/")
-                # print(f"{source_end} is source end")
-                # print(split_point)
-                while split_point[0] != source_end:
-                    split_point.pop(0)  # Removes "Test_Source"
-                    # new_start = split_point[:-1]
-                    # file_only = file_only[split_point + 1:]
-                split_point.pop(0)
+                
                 # print("here")
+                split_point = self.remove_start_path(file)
                 print(split_point)
                 new_path = ""
                 for dir in split_point:
@@ -194,8 +245,25 @@ class Backup:
                         new_path = ""
                         continue
                     elif Path(source_files[index]).suffix not in self.ignored_ext:
-                        shutil.copy(source_files[index], new_path)
-                        count = count + 1
+
+                        # Check whether file was modified withint the last x hours.
+                        if self.overwrite and self.overwrite_condition == "Recently Modified":
+
+                            modified_witin = 7 * 24
+                            modified_witin = 1 / 120  # 30 seconds
+
+                            if self.check_file_last_modified(file, modified_witin):
+                                shutil.copy(source_files[index], new_path)
+                                count = count + 1
+                            else: 
+                                progress_bar() 
+                                logging.info(f"{file} not overwritten because not updated in the last {modified_witin} hours.")
+                                continue
+
+                        else:
+
+                            shutil.copy(source_files[index], new_path)
+                            count = count + 1
                 
 
                 # sleep(0.5)
@@ -212,6 +280,7 @@ class Backup:
         logging.info(f"Backup job completed in {time_taken:0.4f} seconds.")
         return output
     
+
     def empty_directory(self, directory: str) -> bool:
         """Remove all files in the given directory"""
         files = glob.glob(f"{directory}/**", recursive=True)
@@ -244,12 +313,16 @@ if __name__ == "__main__":
 
     # backup.empty_directory(target)
 
-    good_source = "Tests/Test_Source"
-    good_target = "Tests/Test_Target"
-    ignored_directory = f"{good_source}/IgnoredDirectory"
-    backup = Backup(good_source, good_target, ignored_directories=[ignored_directory])
+    good_source = "Test_Source"
+    good_target = "Test_Target"
 
+    # good_source = "/home/henry/Documents/Repositories/backup_cronjob/Test_Source"
+    # good_target = "/home/henry/Documents/Repositories/backup_cronjob/Test_Target"
+    # ignored_directory = f"{good_source}/IgnoredDirectory"
+    # backup = Backup(good_source, good_target, ignored_directories=[ignored_directory])
     
+    
+    backup = Backup(good_source, good_target, overwrite=True, overwrite_condition= "Recently Modified")
     result = backup.transfer_files()
 
     # backup = Backup(1, target)
@@ -257,6 +330,18 @@ if __name__ == "__main__":
 
     # print(result)
 
+    # last_mod = backup.check_file_last_modified("Test_Source/Test.md", 7)
+    # print(datetime.now())
+    # print(time.time())
+
+    # seconds_since_modified = time.time() - last_mod
+
+    # print(seconds_since_modified)
+
+    # minutes_since_modified = seconds_since_modified / 60
+    # hours_since_modified = minutes_since_modified / 60
+    # print(minutes_since_modified)
+    # print(hours_since_modified)
 
 
 
