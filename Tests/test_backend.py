@@ -3,7 +3,6 @@ import pathlib
 import os
 import pytest
 from datetime import datetime
-from time import sleep
 
 # Adds "backend" to be a location that the interpretter searches for modules.
 sys.path.append("./backend") 

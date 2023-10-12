@@ -1,6 +1,6 @@
 # backup_cronjob
 
-Last update: 2023-09-27 21:54
+Last update: 2023-09-28 00:03
 <br><br>
 
 ## Development Notes for backup_cronjob
@@ -40,11 +40,21 @@ Last update: 2023-09-27 21:54
         - Update all files ✅ (Default)
         - Update file if modified within the last x days ("Recently Modified") ✅
     - **Not overwrite**
-        - Fail if target is not empty ("Target Empty")
-        - Ignore files that already exist ("Ignore")
-        - Create a "(1)" duplicate of the file ("Duplicate")
+        - Fail if target is not empty ("Target Empty") ✅
+        - Ignore files that already exist ("Ignore") ✅
+        - Create a "(1)" duplicate of the file ("Duplicate") ✅
     - Just making sure it works with full paths
         - Yep, seems fine
     - Separating the transfer_files() into separate functions
     - Testing "Overwrite ➡️ Update all files" works
         - Yep, it already works
+10. Fixing the tests
+    - All working
+    - TODO: Linting, bash script, frontend?
+11. Code cleanup
+    - Removing commented code
+    - Making a *requirements.txt*
+    - Making the *ton.ini* file
+    - Now working with ` tox -e lint `, ` tox ` or ` tox -e tests `.
+    - Slowly linting
+    - Need to incorporate Black into it.
