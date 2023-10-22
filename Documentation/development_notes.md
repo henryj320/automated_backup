@@ -1,6 +1,6 @@
 # backup_cronjob
 
-Last update: 2023-09-28 00:03
+Last update: 2023-10-22 01:36
 <br><br>
 
 ## Development Notes for backup_cronjob
@@ -58,3 +58,22 @@ Last update: 2023-09-28 00:03
     - Now working with ` tox -e lint `, ` tox ` or ` tox -e tests `.
     - Slowly linting
     - Need to incorporate Black into it.
+12. Moved over to the new Kubuntu 23.10 distro
+    - Having issues with  ` × This environment is externally managed ` whenever I try to pip install
+    - ` pip install pip==22.3.1 --break-system-packages `
+        - Downgrading pip slightly from 23.3.1 to 22.3.1
+    - Now I can ` pip install alive_progress `
+    - ` pip install -r requirements.txt `
+13. Testing genuinely using it
+    - Mounting the SharedFolder
+        -  Created "/mnt/SharedFolder/Henry/"
+        - Setting up mount on boot
+            - ` sudo vi /etc/fstab `
+            - Added ` //192.168.1.20/sharedFolder/Henry /mnt/sharedFolder/Henry cifs credentials=/etc/samba/credentials,uid=1000,gid=1000 0 0 `
+        - Setting up samba credentials
+            - ` sudo vi /etc/samba/credentials `
+            - ` sudo chmod 600 /etc/samba/credentials `
+        - Seeing if it works
+            - ` systemctl daemon-reload `
+            - ` sudo mount -a `
+            - ` sudo apt install cifs-utils `

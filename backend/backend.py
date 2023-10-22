@@ -163,7 +163,7 @@ class Backup:
 
         return True
 
-    # # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def transfer_files(self):
         """Transfers the files from the source to the directory, respecting the user inputs."""
 
@@ -332,7 +332,7 @@ class Backup:
         return True
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # source = Path("./Test_Source")
     # target = Path("./Test_Target")
 
@@ -345,8 +345,8 @@ if __name__ == "__main__":
 
     # backup.empty_directory(target)
 
-    good_source = "Test_Source"
-    good_target = "Test_Target"
+    # good_source = "Test_Source"
+    # good_target = "Test_Target"
 
     # good_source = "/home/henry/Documents/Repositories/backup_cronjob/Test_Source"
     # good_target = "/home/henry/Documents/Repositories/backup_cronjob/Test_Target"
@@ -354,9 +354,9 @@ if __name__ == "__main__":
     # backup = Backup(good_source, good_target, ignored_directories=[ignored_directory])
 
 
-    backup = Backup(good_source, good_target, overwrite=True)
-    result = backup.transfer_files()
-    print(result["files_transferred"])
+    # backup = Backup(good_source, good_target, overwrite=True)
+    # result = backup.transfer_files()
+    # print(result["files_transferred"])
 
     # backup = Backup(1, target)
     # result = backup.check_dir_exists()
