@@ -8,6 +8,7 @@ import glob
 import time
 from datetime import datetime
 from alive_progress import alive_bar
+import click
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -330,9 +331,27 @@ class Backup:
                 shutil.rmtree(file)
 
         return True
+    
 
 
-# if __name__ == "__main__":
+@click.command()
+@click.argument("source", type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
+@click.argument("target", type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
+@click.option("--overwrite", type=bool, default=False, help="Whether or not files in the target directory can be overwritten")
+@click.option("--condition", type=str, default="Target Empty", help="'Target Empty', 'Ignore', 'Duplicate', or 'Recently Modified'")
+@click.option("--ignored_ext", type=list, default=[], help="Extensions like '.png' which will be ignored")
+@click.option("--ignored_files", type=list,default=[], help="Specific filepaths to ignore")
+@click.option("--ignored_dir", type=list,default=[], help="Paths to directories to ignore")
+@click.option("--dry_run", type=bool, default=False, help="If set to 'true', no files will be written")
+def run(source, target, overwrite, condition, ignored_ext, ignored_files, ignored_dir, dry_run):
+
+    backup = Backup(source, target, overwrite, condition, ignored_ext, ignored_files, ignored_dir, dry_run)
+    print(backup.transfer_files())
+
+
+
+if __name__ == "__main__":
+    run()
     # source = Path("./Test_Source")
     # target = Path("./Test_Target")
 

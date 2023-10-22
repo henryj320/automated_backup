@@ -77,3 +77,9 @@ Last update: 2023-10-22 01:36
             - ` systemctl daemon-reload `
             - ` sudo mount -a `
             - ` sudo apt install cifs-utils `
+14. Creating click options
+    - So that I can run it from a Bash script.
+    - Trying to run ` python3 backend/backend.py ./Tests/Test_Source ./Tests/Test_Target `
+        - That works!
+    - ` python3 backend/backend.py ./Tests/Test_Source ./Tests/Test_Target --overwrite True `
+        - Looks good
