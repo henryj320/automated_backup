@@ -1,9 +1,9 @@
-# backup_cronjob
+# automated_backup
 
 Last update: 2023-10-22 01:36
 <br><br>
 
-## Development Notes for backup_cronjob
+## Development Notes for automated_backup
 
 1. Set up the repository.
 2. Set up the basic "Backup" class.
@@ -83,3 +83,10 @@ Last update: 2023-10-22 01:36
         - That works!
     - ` python3 backend/backend.py ./Tests/Test_Source ./Tests/Test_Target --overwrite True `
         - Looks good
+15. Writing a bash script to run it
+    - Made *auto_backup_bash.sh* in "Frontend".
+    - ` chmod +x ` on the Bash script and Python script.
+    - I had to add a "Shebang" line to the Python script
+    - It works!
+    - Making it so that the user can input the parameters when running the script.
+    - Struggling to pass the arrays as parameters.

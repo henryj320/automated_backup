@@ -1,11 +1,11 @@
-# backup_cronjob
+# automated_backup
 
 Last update: 2023-09-17 17:56
 <br><br>
 
-## backup_cronjob
+## automated_backup
 
-**Title**: backup_cronjob
+**Title**: automated_backup
 
 **Date Started**: 2023-09-17
 

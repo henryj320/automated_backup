@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 """Module to backup a directory to a target location."""
+
 from pathlib import Path
 import os
 import shutil
@@ -206,8 +208,11 @@ class Backup:
                         progress_bar() # pylint: disable=not-callable
                         new_path = ""
                         continue
-                    os.mkdir(new_path)
-                    logging.info("New directory created: %s.", new_path)
+                    try:
+                        os.mkdir(new_path)
+                        logging.info("New directory created: %s.", new_path)
+                    except FileExistsError:
+                        pass
 
                 # If it is a file, not directory.
                 else:
@@ -236,7 +241,7 @@ class Backup:
 
                             if self.overwrite_condition == "Recently Modified":
 
-                                modified_witin = 7 * 24  # 7 days.
+                                modified_witin = 1 * 24  # 7 days.
 
                                 if self.check_file_last_modified(file, modified_witin):
                                     shutil.copy(file, new_path)
@@ -367,8 +372,8 @@ if __name__ == "__main__":
     # good_source = "Test_Source"
     # good_target = "Test_Target"
 
-    # good_source = "/home/henry/Documents/Repositories/backup_cronjob/Test_Source"
-    # good_target = "/home/henry/Documents/Repositories/backup_cronjob/Test_Target"
+    # good_source = "/home/henry/Documents/Repositories/automated_backup/Test_Source"
+    # good_target = "/home/henry/Documents/Repositories/automated_backup/Test_Target"
     # ignored_directory = f"{good_source}/IgnoredDirectory"
     # backup = Backup(good_source, good_target, ignored_directories=[ignored_directory])
 
