@@ -241,7 +241,7 @@ class Backup:
 
                             if self.overwrite_condition == "Recently Modified":
 
-                                modified_witin = 1 * 24  # 7 days.
+                                modified_witin = 7 * 24  # 7 days.
 
                                 if self.check_file_last_modified(file, modified_witin):
                                     shutil.copy(file, new_path)

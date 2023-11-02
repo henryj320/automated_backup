@@ -1,6 +1,6 @@
 # automated_backup
 
-Last update: 2023-10-22 01:36
+Last update: 2023-11-02 18:02
 <br><br>
 
 ## Development Notes for automated_backup
@@ -90,3 +90,19 @@ Last update: 2023-10-22 01:36
     - It works!
     - Making it so that the user can input the parameters when running the script.
     - Struggling to pass the arrays as parameters.
+16. Fixing Errors
+    - Getting an Error "FileExistsError: [Errno 17] File exists: '/mnt/SharedFolder/Henry/Backups/Documents/Automated Backups/DnD//The Bank Job (May 2023)' "
+        - Looks like it cannot recreate files if they already exist.
+    - All good, except "Ignored Dir" is not at all working at the moment.
+    - For some reason, have to run it once with "Target Empty" and then you can use recently modified
+17. Setting up a cronjob
+    - ` export EDITOR=vim && export VISUAL=vim `
+    - ` crontab - e`
+    - ` @reboot sleep 600 && /home/henry/Documents/GitHub/backup_cronjob/Frontend/auto_backup_bash.sh >> /home/henry/Documents/GitHub/backup_cronjob/Frontend/Ideapad-Cronjob.log 2>&1 
+    - It logs a lot`
+18. Future to do:
+    - Sync all files
+        - If removed, also remove
+        - If updated at all, update
+    - Frontend
+    - Decrease how much it logged.

@@ -12,15 +12,25 @@
 # read -e -i "False" -p "Is this a dry run? (True/False) " dry_run
 
 
-source="/home/henry/Documents/GitHub/backup_cronjob/Tests/Test_Source"
-target="/home/henry/Documents/GitHub/backup_cronjob/Tests/Test_Target/"
+# source="/home/henry/Documents/GitHub/backup_cronjob/Tests/Test_Source"
+# target="/home/henry/Documents/GitHub/backup_cronjob/Tests/Test_Target/"
 
-source=$(echo "$source" | sed 's/\/$//')  # Removes trailing "/" characters.
+
+# Check that the server exists.
+server=192.168.1.20
+if ! ping -c 1 "$server"; then
+    echo "No connection to server. Exiting."
+    exit 1
+fi
+
+source="/home/henry/Documents"
+target="/mnt/SharedFolder/Henry/Backups/Documents/Automated Backups"
+
+# Removes trailing "/" characters.
+source=$(echo "$source" | sed 's/\/$//')
 target=$(echo "$target" | sed 's/\/$//')
 
-# source="/home/henry/Documents/Pets"
-# target="/mnt/SharedFolder/Henry/Backups/Documents/Automated Backups/Pets"
-
+# Checks that the source and target exist.
 if ! [[ -d "$source" ]]; then
     echo "Source does not exist. Exiting."
     exit 1
@@ -41,4 +51,3 @@ path_to_repo="/home/henry/Documents/GitHub/backup_cronjob/"
 # Call the Python script with Click arguments
 # "$path_to_repo"backend/backend.py "$source" "$target" --overwrite "$overwrite" --condition "$condition" --dry_run "$dry_run"
 "$path_to_repo"backend/backend.py "$source" "$target" --overwrite "$overwrite" --condition "$condition" --dry_run "$dry_run"
-
