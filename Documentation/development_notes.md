@@ -100,9 +100,20 @@ Last update: 2023-11-02 18:02
     - ` crontab - e`
     - ` @reboot sleep 600 && /home/henry/Documents/GitHub/backup_cronjob/Frontend/auto_backup_bash.sh >> /home/henry/Documents/GitHub/backup_cronjob/Frontend/Ideapad-Cronjob.log 2>&1 
     - It logs a lot`
-18. Future to do:
+18. Added a notification on completion
+    - ` sudo apt update `
+    - ` sudo apt upgrade `
+    - ` sudo apt install libnotify-bin `
+    - ` notify-send "this is the summary" `
+19. Moving the Rocky automated backup script to its own place - "/home/henry/Documents/Software/Automated_Backup/"
+    - Also genericised the *auto_backup_bash.sh* script.
+    - It all works. Looks good!
+        - Backs up 1 minute after reboot if it can connect to the server.
+    - ` @reboot sleep 60 && /home/henry/Software/Automated_Backup/auto_backup_bash.sh >> /home/henry/Software/Automated_Backup/Ideapad-Cronjob.log 2>&1 `
+20. Future to do:
     - Sync all files
         - If removed, also remove
         - If updated at all, update
     - Frontend
     - Decrease how much it logged.
+    - Make it so that "files_transferred" does not increase if the file is skipped.
