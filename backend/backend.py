@@ -171,8 +171,8 @@ class Backup:
         """Transfers the files from the source to the directory, respecting the user inputs."""
 
         logging.info(
-            "Transfer process started with the following settings: {Overwrite: %s, Dry Run: %s}.",
-            self.overwrite, self.dry_run
+            "Transfer process started with the following settings: {Source: %s, Target: %s, Overwrite: %s, Dry Run: %s}.",
+            self.source, self.target, self.overwrite, self.dry_run
         )
         start = time.perf_counter()
 
@@ -191,7 +191,7 @@ class Backup:
                 # Removes all directories from the path so just the file is left.
 
                 split_point = self.remove_start_path(file)
-                print(split_point)
+                # print(split_point)
                 new_path = ""
                 for directory in split_point:
                     new_path = new_path + "/" + directory
@@ -217,8 +217,8 @@ class Backup:
                 # If it is a file, not directory.
                 else:
                     file_location = os.path.dirname(file)
-                    print(f"file_location - {file_location}")
-                    print(f"new_path - {new_path}")
+                    # print(f"file_location - {file_location}")
+                    # print(f"new_path - {new_path}")
                     if self.dry_run:
                         logging.info("DRY RUN: File would be copied to: %s.", new_path)
                         progress_bar() # pylint: disable=not-callable
@@ -256,7 +256,6 @@ class Backup:
 
                             else:
                                 shutil.copy(file, new_path)
-                                count = count + 1
 
                         # self.overwrite is set to false.
                         else:
@@ -269,7 +268,7 @@ class Backup:
                                     count = count + 1
                                 else:
                                     progress_bar() # pylint: disable=not-callable
-                                    logging.info("%s not overwritten as it already exists.", file)
+                                    # logging.info("%s not overwritten as it already exists.", file)
                                     continue
 
                             elif self.overwrite_condition == "Duplicate":
