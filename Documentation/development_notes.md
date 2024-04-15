@@ -1,9 +1,10 @@
-# automated_backup
+# Development Notes for automated_backup
 
-Last update: 2023-11-02 18:02
+
+Last update: 2024-04-16 00:18
 <br><br>
 
-## Development Notes for automated_backup
+## First Sprint
 
 1. Set up the repository.
 2. Set up the basic "Backup" class.
@@ -115,5 +116,39 @@ Last update: 2023-11-02 18:02
         - If removed, also remove
         - If updated at all, update
     - Frontend
-    - Decrease how much it logged.
+    - Decrease how much is logged.
     - Make it so that "files_transferred" does not increase if the file is skipped.
+
+## Second Sprint
+
+### Planning
+
+- The end goal of this sprint is:
+    - The task can be set up and run through a web UI.
+    - This web UI gives live updates on the backup, alongside results.
+    - Current issues in the backend have been fixed.
+
+#### Frontend
+
+- Idea
+    - Permanently-running frontend on the Rocky server. OR...
+    - Frontend that runs with upon calling Automated Backup
+        - Allows you to set the below fields.
+        - Shows graphs on...
+            - Number of files transferred
+            - Amount of data
+        - "Start" button
+            - Shows the progress of the copying files
+            - Shows number of files / size of target before and after
+- Input fields
+    - Source
+    - Target
+    - Condition
+        - Have things like "Recently modified" greyed out if the target is empty
+
+#### Backend
+
+- Improvements to make
+    - Less being logged
+    - "files_transferred" does not increase if the file is skipped.
+    - Set up a Docker file to run FastAPI and the SwaggerUI.

@@ -246,12 +246,16 @@ class Backup:
                                 if self.check_file_last_modified(file, modified_witin):
                                     shutil.copy(file, new_path)
                                     count = count + 1
+                                    logging.info(
+                                        "%s has been overwritten to %s.",
+                                        file, new_path
+                                    )
                                 else:
                                     progress_bar() # pylint: disable=not-callable
-                                    logging.info(
-                                        "%s not overwritten because not updated in the last %s hours.",
-                                        file, modified_witin
-                                    )
+                                    # logging.info(
+                                        # "%s not overwritten because not updated in the last %s hours.",
+                                        # file, modified_witin
+                                    # )
                                     continue
 
                             else:
